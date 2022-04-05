@@ -22,4 +22,13 @@ git checkout interfaces-only
 This branch is missing the implementations. The skeletons are provided but each function just `revert`s. Start on this branch to implement your solution.
 
 ### Hints
-Remember there is no "right" solution because there are many possible implementations. Here are some Solidity topics that will help you along the way:
+Remember there is no "right" solution because there are many possible implementations. Here are some topics that will help you along the way:
+- [Mappings](https://solidity-by-example.org/mapping/)
+- [Modifiers](https://solidity-by-example.org/function-modifier/)
+- The difference between `memory` and `storage`
+- [NatSpec](https://docs.soliditylang.org/en/develop/natspec-format.html)
+- Solidity [style guide](https://docs.soliditylang.org/en/v0.8.13/style-guide.html)
+- Solidity [security considerations](https://docs.soliditylang.org/en/v0.8.13/security-considerations.html)
+
+### Feedback
+Want to make a suggestion for improvement! Open up an issue or a pull request :).
