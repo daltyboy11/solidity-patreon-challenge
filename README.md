@@ -9,7 +9,11 @@ At the end of this challenge you will have learned important concepts in Solidit
 
 ### Challenge setup
 #### **Clone and run the project**
+Verify you can get the project up and running with the following (you must have npm installed)
 ```
+git@github.com:daltyboy11/solidity-patreon-challenge.git
+npm install
+npx hardhat test
 ```
 #### **Checkout the `interfaces-only` branch**
 ```
