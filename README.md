@@ -21,7 +21,7 @@ git checkout interfaces-only
 This branch has the skeleton implementations you need to implement. Start on this branch to implement your solution.
 
 #### Start coding!
-Your task is to convert the NatSpec description to working implementation.
+Your task is to convert the NatSpec description to a working implementation.
 Your solution is finished when you pass all the test cases
 ```
 npx hardhat test
