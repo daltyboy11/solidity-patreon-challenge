@@ -6,8 +6,8 @@ import "./PatreonRegistry.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Patreon is IPatreon, Ownable {
-    uint public override subscriptionFee;
-    uint public override subscriptionPeriod;
+    uint public immutable override subscriptionFee;
+    uint public immutable override subscriptionPeriod;
     uint public override ownerBalance;
     uint public override subscriberCount;
     string public override description;
@@ -18,6 +18,8 @@ contract Patreon is IPatreon, Ownable {
         uint _subscriptionPeriod,
         string memory _description
     ) Ownable() {
+        subscriptionFee = 0;
+        subscriptionPeriod = 0;
         revert("Implement me!");
     }
 
