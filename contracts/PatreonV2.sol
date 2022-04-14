@@ -59,6 +59,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         override
         onlyOwner
     {
+        require(subscriberCount > 0, "You need subscribers first lolz");
         require(
             chargeStatus == ChargeStatus.INITIATE_CHARGE || chargeStatus == ChargeStatus.EXECUTE_CHARGE,
             "Invalid chargeStatus"
@@ -89,8 +90,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         assert(chargeStatus == ChargeStatus.EXECUTE_CHARGE);
         assert(subscribersToCharge.length == _randomWords.length);
 
-        uint numSubscribers = subscribersToCharge.length;
-        for (uint i = 0; i < numSubscribers; i = i + 1) {
+        for (uint i = 0; i < subscribersToCharge.length; i++) {
             Subscriber storage subscriber = _subscribers[subscribersToCharge[i]];
             // We can charge a subscriber iff `isSubscribed` == true && `lastChargedAt` + `subscriptionPeriod` >= `block.timestamp`.abi
             // Simply ignore addresses that don't match this criteria
@@ -98,12 +98,18 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
                 continue;
             
             // Waive the subscription fee with 1/numSubscribers probability. On average 1 subscriber
-            // per period will have their subscription waived
-            if (_randomWords[i] % numSubscribers == 0) {
+            // per period will have their subscription waived. Note the edge case with 1 subscriber
+            // Based on our formula they will have a 100% chance of having the fee waived. So instead
+            // we make it a 50% chance.
+            if (
+                subscriberCount == 1 && _randomWords[i] % 2 == 0 ||
+                subscriberCount > 1 && _randomWords[i] % subscriberCount == 0
+            )
+            {
                 // Fee is waived for this subscriber
                 emit FeeWaived(subscribersToCharge[i]);
                 continue;
-            } 
+            }
 
             uint subscriptionBalanceBeforeCharge = subscriber.balance;
             if (subscriber.balance < subscriptionFee) {

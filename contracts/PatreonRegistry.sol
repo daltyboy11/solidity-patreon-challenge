@@ -9,7 +9,7 @@ contract PatreonRegistry is IPatreonRegistry {
     uint public override numPatreons;
 
     // Track the Patreon contracts owned by an EOA
-    mapping(address => address[]) private ownerToPatreons;
+    mapping(address => address[]) internal ownerToPatreons;
     // Track the Patreon contracts to which an EOA is currently subscribed
     // or has subscribed to in the past
     mapping(address => address[]) private subscriberToPatreons;
@@ -30,6 +30,7 @@ contract PatreonRegistry is IPatreonRegistry {
         uint _subscriptionPeriod,
         string memory _description
     )
+        virtual
         external
         override
         returns (address)
