@@ -6,6 +6,9 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "./PatreonRegistry.sol";
 import "./PatreonV2.sol";
 
+/// @title A PatreonRegistry compatible with PatreonV2 to incorporate the Chainlink VRF v2 Oracle
+/// @author Dalton Sweeney
+/// @notice Hardcoded addresses are for the RINKEBY testnet
 contract PatreonRegistryV2 is Ownable, PatreonRegistry {
 
     // Rinkeby coordinator contract
@@ -34,6 +37,7 @@ contract PatreonRegistryV2 is Ownable, PatreonRegistry {
         COORDINATOR.requestSubscriptionOwnerTransfer(_chainlinkSubscriptionId, owner());
     }
 
+    /// @inheritdoc PatreonRegistry
     function createPatreon(
         uint _subscriptionFee,
         uint _subscriptionPeriod,

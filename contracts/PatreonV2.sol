@@ -6,6 +6,10 @@ import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "./Patreon.sol";
 
+/// @title A Patreon contract that will randomly waive the subcription
+// fee of one lucky subscriber per subscription period
+/// @author Dalton Sweeney
+/// @notice Any hardcoded values are for the RINKEBY testnet
 contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
 
     event FeeWaived(address indexed subscriber);
