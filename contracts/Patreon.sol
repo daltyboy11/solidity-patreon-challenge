@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "./IPatreon.sol";
 import "./PatreonRegistry.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Patreon is IPatreon, Ownable {
     uint public immutable override subscriptionFee;
@@ -12,7 +13,7 @@ contract Patreon is IPatreon, Ownable {
     uint public override subscriberCount;
     string public override description;
     address private immutable registryAddress;
-    mapping(address => Subscriber) private _subscribers;
+    mapping(address => Subscriber) internal _subscribers;
 
     modifier onlySubscriber() {
         require(_subscribers[msg.sender].isSubscribed, "Patreon: not subscribed");
@@ -77,6 +78,7 @@ contract Patreon is IPatreon, Ownable {
 
     function chargeSubscription(address[] calldata subscribers)
         external
+        virtual
         override
         onlyOwner
     {
