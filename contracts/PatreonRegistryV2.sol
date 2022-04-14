@@ -8,9 +8,9 @@ import "./PatreonV2.sol";
 
 contract PatreonRegistryV2 is Ownable, PatreonRegistry {
 
+    // Rinkeby coordinator contract
     VRFCoordinatorV2Interface public COORDINATOR = VRFCoordinatorV2Interface(0x6168499c0cFfCaCD319c818142124B7A15E857ab);
     uint64 public chainlinkSubscriptionId;
-    bool private didInit = false;
 
     constructor(uint64 _chainlinkSubscriptionId) Ownable() {
         chainlinkSubscriptionId = _chainlinkSubscriptionId;

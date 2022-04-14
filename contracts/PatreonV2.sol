@@ -60,10 +60,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         onlyOwner
     {
         require(subscriberCount > 0, "You need subscribers first lolz");
-        require(
-            chargeStatus == ChargeStatus.INITIATE_CHARGE || chargeStatus == ChargeStatus.EXECUTE_CHARGE,
-            "Invalid chargeStatus"
-        );
+        require(chargeStatus == ChargeStatus.INITIATE_CHARGE || chargeStatus == ChargeStatus.EXECUTE_CHARGE, "Invalid chargeStatus");
 
         if (chargeStatus == ChargeStatus.INITIATE_CHARGE) {
             initateCharge(subscribers);
