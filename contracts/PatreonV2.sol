@@ -20,6 +20,21 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         EXECUTE_CHARGE
     }
 
+    modifier onlyInitiateCharge {
+        require(chargeStatus == ChargeStatus.INITIATE_CHARGE, "Must be INITIATE_CHARGE");
+        _;
+    }
+
+    modifier onlyPendingRandomWords {
+        require(chargeStatus == ChargeStatus.PENDING_RANDOM_WORDS, "Must be PENDING_RANDOM_WORDS");
+        _;
+    }
+
+    modifier onlyExecuteCharge {
+        require(chargeStatus == ChargeStatus.EXECUTE_CHARGE, "Must be EXECUTE_CHARGE");
+        _;
+    }
+
     uint64 immutable private chainlinkSubscriptionId; 
     bytes32 public keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
     uint32 public callbackGasLimit = 100000;
@@ -51,8 +66,8 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
     )
         internal
         override
+        onlyPendingRandomWords
     {
-        require(chargeStatus == ChargeStatus.PENDING_RANDOM_WORDS, "Invalid chargeStatus");
         require(requestId == _requestId);
         _randomWords = randomWords;
         chargeStatus = ChargeStatus.EXECUTE_CHARGE;
@@ -73,7 +88,10 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         }
     }
 
-    function initateCharge(address[] memory subscribers) private {
+    function initateCharge(address[] memory subscribers)
+        private
+        onlyInitiateCharge
+    {
         assert(chargeStatus == ChargeStatus.INITIATE_CHARGE);
         require(subscribers.length <= 500, "Exceeded VRFCoordinatorV2.MAX_NUM_WORDS");
         subscribersToCharge = subscribers;
@@ -87,7 +105,10 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         );
     }
 
-    function executeCharge() private {
+    function executeCharge()
+        private
+        onlyExecuteCharge
+    {
         assert(chargeStatus == ChargeStatus.EXECUTE_CHARGE);
         assert(subscribersToCharge.length == _randomWords.length);
 
