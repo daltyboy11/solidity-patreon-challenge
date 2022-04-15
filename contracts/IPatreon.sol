@@ -63,6 +63,15 @@ interface IPatreon {
         uint indexed chargedAt
     );
 
+    /// @notice Revert with this error when a balance requested exceeds the maximum allowable balance
+    /// @param requested wei amount requested
+    /// @param limit the maximum amount (i.e. limit < requested)
+    error InsufficientFunds(uint256 requested, uint256 limit);
+
+    /// @notice Revert with this error when unauthorized access to a function is attempted
+    /// @param _address who made the failed access attempt
+    error Unauthorized(address _address);
+
     /// @notice Human readable description, e.g. purpose, perks unlocked, etc.
     function description() external view returns (string memory);
 

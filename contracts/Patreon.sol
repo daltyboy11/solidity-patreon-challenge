@@ -16,17 +16,20 @@ contract Patreon is IPatreon, Ownable {
     mapping(address => Subscriber) internal _subscribers;
 
     modifier onlySubscriber() {
-        require(_subscribers[msg.sender].isSubscribed, "Patreon: not subscribed");
+        if(!_subscribers[msg.sender].isSubscribed)
+            revert Unauthorized(msg.sender);
         _;
     }
     
     modifier onlyNonSubscriber() {
-        require(!_subscribers[msg.sender].isSubscribed);
+        if (_subscribers[msg.sender].isSubscribed)
+            revert Unauthorized(msg.sender);
         _;
     }
 
     modifier onlyNonOwner() {
-        require(msg.sender != owner(), "Patreon: owner cannot call this function");
+        if (msg.sender == owner())
+            revert Unauthorized(msg.sender);
         _;
     }
 
@@ -49,7 +52,8 @@ contract Patreon is IPatreon, Ownable {
         onlyNonSubscriber
         onlyNonOwner
     {
-        require(msg.value >= subscriptionFee, "Patreon: must subscribe with minimum fee");
+        if (msg.value < subscriptionFee)
+            revert InsufficientFunds(subscriptionFee, msg.value);
 
         Subscriber storage subscriber = _subscribers[msg.sender];
         ownerBalance += subscriptionFee;
@@ -123,8 +127,10 @@ contract Patreon is IPatreon, Ownable {
     function withdraw(uint amount) external override {
         if (msg.sender == owner()) {
             withdrawOwnerBalance(amount);
-        } else {
+        } else if (_subscribers[msg.sender].isSubscribed) {
             withdrawSubscriberBalance(amount);
+        } else {
+            revert Unauthorized(msg.sender);
         }
     }
 
@@ -138,13 +144,17 @@ contract Patreon is IPatreon, Ownable {
     }
 
     function withdrawOwnerBalance(uint amount) private onlyOwner {
-        require(amount <= ownerBalance, "Patreon: owner withdrawing too much");
+        if (amount > ownerBalance)
+            revert InsufficientFunds(amount, ownerBalance);
+
         ownerBalance -= amount;
         payable(owner()).transfer(amount);
     }
 
     function withdrawSubscriberBalance(uint amount) private onlySubscriber {
-        require(amount <= _subscribers[msg.sender].balance, "Patreon: cannot withdraw more than the balance");
+        if (amount > _subscribers[msg.sender].balance)
+            revert InsufficientFunds(amount, _subscribers[msg.sender].balance);
+
         _subscribers[msg.sender].balance -= amount;
         payable(msg.sender).transfer(amount);
     }

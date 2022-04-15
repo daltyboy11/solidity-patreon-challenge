@@ -5,6 +5,40 @@ const {
 } = require("@openzeppelin/test-helpers");
 const PatreonJson = require("../artifacts/contracts/Patreon.sol/Patreon.json");
 
+/**
+ * Create the error string to pass to the `revertedWith` chai matcher for matching
+ * custom solidity errors
+ * @param {*} errorName custom error name
+ * @param {*} args args passed to the custom error as an array
+ * @returns The custom error with its arguments in string representation
+ *
+ * Example:
+ * To test contract function foo is reverted with `revert Bar(uint256 amount, address _address)`
+ * Then do the following:
+ * await expect(contract.foo()).to.be.revertedWith(customError("Bar", [expectedAmount, expectedAddress]));
+ */
+const customError = (errorName, args) => {
+    let s;
+    if (args.length === 0) {
+        s = `${errorName}()`;
+    } else {
+        s = `${errorName}(`;
+        args.forEach((arg, i) => {
+            let argAsString;
+            if (typeof arg === "string") {
+                argAsString = `"${arg}"`
+            } else {
+                argAsString = arg;
+            }
+            if (i === args.length-1) {
+                s += `${argAsString})`;
+            } else {
+                s += `${argAsString}, `;
+            }
+        });
+    }
+    return s;
+}
 
 /**
  * Tests for the Patreon contract
@@ -59,13 +93,13 @@ describe("Patreon", () => {
         it("should reject funds from a non-subscriber", async () => {
             await expect(
                 patreon.connect(signer2).depositFunds({ value: ethers.utils.parseEther("0.5") })
-            ).to.be.revertedWith("Patreon: not subscribed");
+            ).to.be.revertedWith(customError("Unauthorized", [signer2.address]));
         });
 
         it("should reject funds from the owner", async () => {
             await expect(
                 patreon.connect(owner).depositFunds({value: ethers.utils.parseEther("1.0")})
-            ).to.be.revertedWith("Patreon: not subscribed");
+            ).to.be.revertedWith(customError("Unauthorized", [owner.address]));
         });
     });
 
@@ -79,7 +113,7 @@ describe("Patreon", () => {
             it("should reject withdrawal when amount > balance", async () => {
                 await expect(
                     patreon.connect(owner).withdraw(201)
-                ).to.be.revertedWith("Patreon: owner withdrawing too much");
+                ).to.be.revertedWith(customError("InsufficientFunds", [201, 200]));
             });
 
             it("should allow withdrawal when amount <= owner balance", async () => {
@@ -92,7 +126,7 @@ describe("Patreon", () => {
             it("should reject withdrawal when amount > balance", async () => {
                 await expect(
                     patreon.connect(signer1).withdraw(ethers.utils.parseEther("1.1"))
-                ).to.be.revertedWith("Patreon: cannot withdraw more than the balance");
+                ).to.be.revertedWith(customError("InsufficientFunds", [ethers.utils.parseEther("1.1"), ethers.utils.parseEther("1.0").sub(100)]));
             });
 
             it("should allow withdrawal when amount <= balance", async () => {
@@ -103,6 +137,12 @@ describe("Patreon", () => {
                 // The amount withdrawan should be subtracted from the withdrawer's contract balance
                 expect(subscription.balance).to.equal(ethers.utils.parseEther("0.6").sub(100))
             });
+        });
+
+        it("should reject unauthorized withdrawals", async () => {
+            await expect(
+                patreon.connect(signer3).withdraw(ethers.utils.parseEther("0.1"))
+            ).to.be.revertedWith(customError("Unauthorized", [signer3.address]));
         });
     });
 
@@ -115,7 +155,7 @@ describe("Patreon", () => {
             it("should revert when called by non-subscriber", async () => {
                 await expect(
                     patreon.connect(signer2).unsubscribe()
-                ).to.be.revertedWith("Patreon: not subscribed");
+                ).to.be.revertedWith(customError("Unauthorized", [signer2.address]));
             });
         });
 
@@ -154,13 +194,13 @@ describe("Patreon", () => {
             it("should revert when owner attempts to subscribe", async () => {
                 await expect(
                     patreon.subscribe({ value: ethers.utils.parseEther("1.0") })
-                ).to.be.revertedWith("Patreon: owner cannot call this function");
+                ).to.be.revertedWith(customError("Unauthorized", [owner.address]));
             });
     
             it("should revert when subscribing without minimum fee", async () => {
                 await expect(
                     patreon.connect(signer1).subscribe({ value: "1" })
-                ).to.be.revertedWith("Patreon: must subscribe with minimum fee");
+                ).to.be.revertedWith(customError("InsufficientFunds", [100, 1]));
             });
         });
 
