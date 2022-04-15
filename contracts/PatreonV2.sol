@@ -20,18 +20,8 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
         EXECUTE_CHARGE
     }
 
-    modifier onlyInitiateCharge {
-        require(chargeStatus == ChargeStatus.INITIATE_CHARGE, "Must be INITIATE_CHARGE");
-        _;
-    }
-
-    modifier onlyPendingRandomWords {
-        require(chargeStatus == ChargeStatus.PENDING_RANDOM_WORDS, "Must be PENDING_RANDOM_WORDS");
-        _;
-    }
-
-    modifier onlyExecuteCharge {
-        require(chargeStatus == ChargeStatus.EXECUTE_CHARGE, "Must be EXECUTE_CHARGE");
+    modifier hasStatus(ChargeStatus status) {
+        require(status == chargeStatus, "Invalid chargeStatus");
         _;
     }
 
@@ -66,7 +56,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
     )
         internal
         override
-        onlyPendingRandomWords
+        hasStatus(ChargeStatus.PENDING_RANDOM_WORDS)
     {
         require(requestId == _requestId);
         _randomWords = randomWords;
@@ -90,7 +80,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
 
     function initateCharge(address[] memory subscribers)
         private
-        onlyInitiateCharge
+        hasStatus(ChargeStatus.INITIATE_CHARGE)
     {
         assert(chargeStatus == ChargeStatus.INITIATE_CHARGE);
         require(subscribers.length <= 500, "Exceeded VRFCoordinatorV2.MAX_NUM_WORDS");
@@ -107,7 +97,7 @@ contract PatreonV2 is Patreon, VRFConsumerBaseV2 {
 
     function executeCharge()
         private
-        onlyExecuteCharge
+        hasStatus(ChargeStatus.EXECUTE_CHARGE)
     {
         assert(chargeStatus == ChargeStatus.EXECUTE_CHARGE);
         assert(subscribersToCharge.length == _randomWords.length);
