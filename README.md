@@ -1,6 +1,7 @@
 # A basic Patreon clone in Solidity
 
-This is a toy project to teach important Solidity and Hardhat concepts.
+The `minimal-proxy` branch of this repository accompanies my [blog post](https://daltyboy11.github.io/deploying-contracts-with-eip-1167-minimal-proxy/) about deploying contracts with
+an EIP-1167 minimal proxy. If you want to attempt the original challenge then check out the `main` branch
 
 ## Challenge
 There are two interfaces, `IPatreon.sol` and `IPatreonRegistry.sol` with full [NatSpec](https://docs.soliditylang.org/en/v0.8.13/natspec-format.html) descriptions. Your goal is to implement them in `Patreon.sol` and `PatreonRegistry.sol` and pass the unit tests in `patreon-test.js` and `patreon-registry-test.js`.
