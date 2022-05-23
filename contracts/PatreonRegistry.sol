@@ -1,10 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./IPatreonRegistry.sol";
 import "./Patreon.sol";
 
 contract PatreonRegistry is IPatreonRegistry {
+    using Clones for address;
+
+    address private patreonImpl;
     mapping(address => bool) public override isPatreonContract;
     uint public override numPatreons;
 
@@ -23,6 +27,11 @@ contract PatreonRegistry is IPatreonRegistry {
         _;
     }
 
+    constructor() {
+        // Create base patreon contract
+        patreonImpl = address(new Patreon());
+    }
+
     /// Create a new Patreon contract and assign it to the caller.
     /// The contract address will appear in the `ownerToPatreons` map.
     function createPatreon(
@@ -35,7 +44,8 @@ contract PatreonRegistry is IPatreonRegistry {
         override
         returns (address)
     {
-        Patreon patreon = new Patreon(
+        Patreon patreon = Patreon(patreonImpl.clone());
+        patreon.initialize(
             address(this),
             _subscriptionFee,
             _subscriptionPeriod,

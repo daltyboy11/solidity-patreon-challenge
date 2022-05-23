@@ -78,6 +78,31 @@ describe("Patreon", () => {
         const patreonAddress = (await patreonRegistry.getPatreonsForOwner(owner.address))[0];
         patreon = new ethers.Contract(patreonAddress, PatreonJson.abi, owner);
     });
+    
+    describe.only("initialization", () => {
+        let patreonInstance;
+        beforeEach(async () => {
+            const patreonFactory = await ethers.getContractFactory("Patreon");
+            patreonInstance = await patreonFactory.connect(signer1).deploy();
+            await patreonInstance.deployed();
+            await patreonInstance.initialize(
+                patreonRegistry.address,
+                100,
+                time.duration.weeks(1).toNumber(),
+                "Test Patreon" 
+            );
+        })
+
+        it("should not allow multiple initializations", async () => {
+            await expect(
+                patreonInstance.initialize(patreonRegistry.address, 100, time.duration.weeks(1).toNumber(), "Test Patreon")
+            ).to.be.reverted;
+        });
+
+        it("should assign ownership to signer after initialization", async () => {
+            expect(await patreonInstance.owner()).to.equal(signer1.address);
+        });
+    });
 
     describe("depositFunds", () => {
         beforeEach(async () => {
